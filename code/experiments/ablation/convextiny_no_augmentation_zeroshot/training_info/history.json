@@ -1,0 +1,82 @@
+[
+  {
+    "epoch": 1,
+    "learning_rate": 0.0001,
+    "train": {
+      "loss": 0.09595226472491411,
+      "square_accuracy": 0.9780731020166074,
+      "non_empty_accuracy": 0.9530031524805044,
+      "perfect_board_accuracy": 0.8374851720047449
+    },
+    "validation": {
+      "loss": 0.005616166435791206,
+      "square_accuracy": 0.9982227488151659,
+      "non_empty_accuracy": 0.9956686518678939,
+      "perfect_board_accuracy": 0.9004739336492891
+    }
+  },
+  {
+    "epoch": 2,
+    "learning_rate": 0.0001,
+    "train": {
+      "loss": 0.004950891752122605,
+      "square_accuracy": 0.9987766903914591,
+      "non_empty_accuracy": 0.9974697195951552,
+      "perfect_board_accuracy": 0.9383155397390273
+    },
+    "validation": {
+      "loss": 0.001523335023603283,
+      "square_accuracy": 0.99948163507109,
+      "non_empty_accuracy": 0.9987366901281357,
+      "perfect_board_accuracy": 0.9715639810426541
+    }
+  },
+  {
+    "epoch": 3,
+    "learning_rate": 0.0001,
+    "train": {
+      "loss": 0.004463039232202649,
+      "square_accuracy": 0.9989991103202847,
+      "non_empty_accuracy": 0.9978015596482496,
+      "perfect_board_accuracy": 0.9501779359430605
+    },
+    "validation": {
+      "loss": 0.00027892579185507166,
+      "square_accuracy": 0.9999259478672986,
+      "non_empty_accuracy": 0.9998195271611623,
+      "perfect_board_accuracy": 0.995260663507109
+    }
+  },
+  {
+    "epoch": 4,
+    "learning_rate": 0.0001,
+    "train": {
+      "loss": 0.0024754793393685056,
+      "square_accuracy": 0.9995551601423488,
+      "non_empty_accuracy": 0.9990044798407167,
+      "perfect_board_accuracy": 0.9810201660735468
+    },
+    "validation": {
+      "loss": 5.6102024280257586e-05,
+      "square_accuracy": 1.0,
+      "non_empty_accuracy": 1.0,
+      "perfect_board_accuracy": 1.0
+    }
+  },
+  {
+    "epoch": 5,
+    "learning_rate": 0.0001,
+    "train": {
+      "loss": 0.004941696618422427,
+      "square_accuracy": 0.9990176453143536,
+      "non_empty_accuracy": 0.9978430396548863,
+      "perfect_board_accuracy": 0.970344009489917
+    },
+    "validation": {
+      "loss": 5.210470942690995e-05,
+      "square_accuracy": 1.0,
+      "non_empty_accuracy": 1.0,
+      "perfect_board_accuracy": 1.0
+    }
+  }
+]

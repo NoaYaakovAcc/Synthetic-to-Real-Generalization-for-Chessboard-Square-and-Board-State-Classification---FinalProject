@@ -1,0 +1,7 @@
+{
+  "square_accuracy": 0.8118578767123288,
+  "non_empty_accuracy": 0.5473380540257016,
+  "perfect_board_accuracy": 0.0,
+  "macro_f1": 0.42670733076425316,
+  "num_boards": 146
+}

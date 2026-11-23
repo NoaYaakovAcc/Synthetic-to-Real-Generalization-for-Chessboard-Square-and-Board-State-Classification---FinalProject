@@ -1,0 +1,20 @@
+{
+  "results": {
+    "argmax": {
+      "square_accuracy": 0.8118578767123288,
+      "non_empty_accuracy": 0.5473380540257016,
+      "perfect_board_accuracy": 0.0,
+      "num_boards": 146
+    },
+    "ilp_constraints": {
+      "square_accuracy": 0.8225599315068494,
+      "non_empty_accuracy": 0.5709415158667716,
+      "perfect_board_accuracy": 0.0,
+      "num_boards": 146
+    }
+  },
+  "fixed_errors": 293,
+  "introduced_errors": 193,
+  "net_corrected_squares": 100,
+  "solver_failures": 0
+}
