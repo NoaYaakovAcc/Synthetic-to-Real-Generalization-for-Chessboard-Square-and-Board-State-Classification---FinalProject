@@ -1,36 +1,67 @@
 # Sim-to-Real Chessboard Square Classifier
 
-This project uses a deep learning model based on **ConvNeXt-Tiny** to recognize chess pieces in chessboard images. It takes an **already cropped and aligned** chessboard image, extracts 64 overlapping square crops, and classifies each square into one of **13 classes**: 12 chess piece classes (six types in two colors) or empty.
+This project uses a deep learning model with convnext-tiny backbone to recognize chess pieces in chessboard images. It takes a pre cropped and aligned chessboard image, extracts 64 expanded square crops and classifies each square into one of 13 classes: 12 chess piece classes (six types in two colors) or empty.
 
-The project studies the transfer from synthetic chessboard renders to real photographs using three training approaches:
+The project studies the transfer from synthetic chessboard images to real world images using three training methods:
 
-- **Zero-Shot:** Train on synthetic images only.
-- **Fine-Tuning:** Continue training a saved model checkpoint using real images.
-- **Combined Training:** Train on synthetic and real images together.
+- **Zero-shot:** Trains on synthetic images only.
+- **Fine-tuning:** Continues training a saved pre trained model checkpoint using real images.
+- **Combined training:** Trains on synthetic and real images together.
 
-The project also includes an **Integer Linear Programming (ILP)** decoder that applies chess-related constraints to the model's class scores. In the prediction script, ILP is the default method; Argmax remains available for comparison.
+The project also includes an integer linear programming (ILP) decoder that applies chess related constraints to the model's class scores. In the prediction script, ILP is the default method but Argmax remains available for comparison if needed.
 
 ## 1. Environment setup
 
-Run the following commands from a terminal. Training, evaluation, and inference were developed for a Python environment; synthetic image generation uses a **separate local Blender setup** described in Section 4.
+Run the following commands from a terminal. Training, evaluation, and inference were developed for a Python environment, synthetic image generation uses a eparate local Blender setup described in Section 4.
 
 ### 1.1 Clone the repository
 
 ```bash
-git clone <repository-url>
-cd <repository-name>/code
+git clone https://github.com/NoaYaakovAcc/Synthetic-to-Real-Generalization-for-Chessboard-Square-and-Board-State-Classification---FinalProject.git chessboard-project
+cd chessboard-project
 ```
-
-Replace the placeholders with the actual GitHub repository URL and directory name. All training and inference commands below assume the working directory is `code/`.
 
 ### 1.2 Create and activate a Conda environment
 
+Choose either **Conda** or **venv**. Only one environment is needed. Python 3.10 is recommended.
+
+**Option A: Conda**
+
 ```bash
-conda create -n chess_project python=3.10 -y
-conda activate chess_project
+conda create -n chess_classifier python=3.10 -y
+conda activate chess_classifier
 ```
 
+Make sure Python preferably 3.10 is installed, then create an environment from the project directory.
+
+```bash
+python -m venv .venv
+```
+
+Windows:
+
+```bash
+.venv\Scripts\Activate
+```
+
+Linux / WSL:
+
+```bash
+python3.10 -m venv .venv
+source .venv/bin/activate
+```
+
+After activating either environment, continue with Section 1.3. To leave it later, run `conda deactivate` for Conda or `deactivate` for venv. Add `.venv/` to `.gitignore` so the local environment is not committed to Git.
+I personally prefer conda
+
 ### 1.3 Install dependencies
+
+If you chose venv please start with"
+
+```bash
+python -m pip install --upgrade pip
+```
+Then for both choices:
 
 ```bash
 python -m pip install -r requirements.txt
@@ -44,14 +75,12 @@ The project uses PyTorch, Torchvision, NumPy, Pandas, Pillow, OpenCV, Matplotlib
 python -c "import torch, torchvision, cv2, chess, pulp; print('All imports OK'); print('CUDA available:', torch.cuda.is_available())"
 ```
 
-`CUDA available: False` is normal on systems without a compatible GPU. To reactivate the existing environment later, use `conda activate chess_project`.
-
 ## 2. Repository structure
 
-The relevant source files are organized as follows (additional Blender-generation files and experiments may be stored separately):
+The relevant source files are organized as follows (additional Blender-generation files and experiments are provided seperatelly in google drive):
 
 ```text
-code/
+chessboard-project/
 ├── config.py
 ├── data.py
 ├── train.py
@@ -73,14 +102,14 @@ code/
 └── experiments/
 ```
 
-- `config.py`: Default paths, hyperparameters, and class-label mappings.
-- `data.py` and `utils/data_utils.py`: Scan labeled images, parse FEN labels, build loaders, and manage FEN-grouped data splits.
-- `model/model.py`: ConvNeXt-Tiny classifier applied to 64 square crops.
-- `pre_post_processing/preprocessing.py`: RGB resizing, normalization, and synthetic-training augmentation.
-- `pre_post_processing/ilp_constraints.py`: ILP decoding with progressively stronger constraints.
+- `config.py`: Default paths, hyperparameters and class-label mappings.
+- `data.py` and `utils/data_utils.py`: Scan labeled images, parse fen labels, build loaders, and manage data splits.
+- `model/model.py`: Convnext-tiny classifier applied to 64 square crops.
+- `pre_post_processing/preprocessing.py`: rgb resizing, normalization and synthetic training augmentation.
+- `pre_post_processing/ilp_constraints.py`: ILP decoding with constraints.
 - `train.py`, `utils/train_utils.py`, and `utils/run_utils.py`: Training and experiment management.
-- `utils/eval_utils.py`: Metrics, confusion matrix, prediction examples, and Argmax–ILP comparisons.
-- `predict/predict.py`: Single-image inference, FEN piece placement, and SVG visualization.
+- `utils/eval_utils.py`: Metrics, confusion matrix, prediction examples and Argmax–ILP comparisons.
+- `predict/predict.py`: Single image inference, fen piece placement and svg visualization.
 
 ## 3. Datasets
 
@@ -90,7 +119,7 @@ code/
 
 **[Open the shared dataset folder on Google Drive](https://drive.google.com/drive/folders/1N6H6DVeqkYA5cxcQiJ63rsGe-8Z9u0Ka?hl=he)**
 
-Download the required game folders and place them inside `code/data/`. Access to the folder may depend on its sharing permissions. Dataset files are distributed separately from the source-code repository.
+Download the required game folders and place them inside `code/data/`. Access to the folder may depend on its sharing permissions.
 
 ### 3.2 Expected game-folder format
 
@@ -114,7 +143,7 @@ data/
         └── ...
 ```
 
-Each game folder must contain either `game<number>.csv` or `positions.csv`. The dataset loader used here expects the columns:
+Each game folder must contain  `game<number>.csv` . The dataset loader used here expects the columns:
 
 ```csv
 from_frame,to_frame,fen
@@ -122,11 +151,15 @@ from_frame,to_frame,fen
 2,2,rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR
 ```
 
-For the current loader, **`from_frame` and `to_frame` must match**. Image names must contain `frame` followed by the frame number, such as `frame_000616.jpg`. Images are matched to their labels by this number. Image paths containing `generated` are treated as **synthetic**, while paths containing `tagged` are treated as **real**.
+For the current loader, **`from_frame` and `to_frame` must match**. 
+Image names must contain `frame` followed by the frame number, such as `frame_000616.jpg`. Images are matched to their labels by this number. For example `frame_000616.jpg` is mached with 616,616 fen.
+
+
+Image paths containing `generated` are treated as **synthetic**, while paths containing `tagged` are treated as **real**.
 
 ### 3.3 Input format and classes
 
-The input must show a **cropped, aligned chessboard**. Preprocessing converts it to RGB, resizes it to **480 × 480**, converts it to a PyTorch tensor, and normalizes it with ImageNet mean and standard deviation. Synthetic training images can additionally receive ColorJitter and GaussianBlur; real training, validation, and test images are not randomly augmented.
+The input must show a cropped and aligned chessboard. Preprocessing converts it to RGB and resizes it.
 
 The 13 output labels are:
 
@@ -140,24 +173,28 @@ The 13 output labels are:
 | 5 | White king | 11 | Black king |
 | 12 | Empty | | |
 
-Predictions follow the **image's row order**: the first output element represents the top-left square of the supplied image. No fixed White/Black viewing orientation is assumed.
+Predictions follow the **image's row order**: the first output element represents the top-left square of the supplied image.
 
-## 4. Generating new synthetic images with Blender (local computer)
+## 4. Generating new synthetic images with blender 
 
-The project has a separate Blender-based synthetic-data generator. **Use it on a local computer (the provided configuration targets Windows and Blender 5.0), not through the project's SLURM training setup.** Its rendering code was configured for NVIDIA OptiX; a different graphics card or CPU-only machine may require adapting the Blender device settings.
+The project includes a separate blender based pipeline for generating synthetic chessboard images from fen positions.
+The generator was developed and tested on Windows using Blender 5.0.
 
 ### 4.1 Files and installation
 
-Prepare the following on the local machine:
+Prepare the following:
 
-1. **Blender 5.0**, installed locally.
-2. The prepared chessboard scene, **`chess-set.blend`**.
-3. The Blender positioning/rendering script, **`chess_position_api_v2.py`**.
-4. The Python driver script containing **`generate_dataset()`** (use its actual filename when running it).
-5. Python with **Pillow** installed for the driver script (`python -m pip install Pillow`). The Blender script uses Blender's bundled Python environment.
-6. A folder containing a CSV with the FEN positions to render.
+1. Blender 5.0 — installed on the machine used for rendering.
+2. chess-set.blend — the prepared blender scene containing the chessboard and chess pieces.
+3. chess_position_api_v2.py — the blender script responsible for positioning pieces according to fen notation and rendering the board.
+4. Dataset generation — the Python script containing generate_dataset(), which manages the rendering process and saves the generated images.
+5. Python and Pillow — required for the dataset generation. Install Pillow using:
 
-The `.blend` file needs the expected chessboard and piece objects. The provided script identifies pieces using object names and their initial positions, so an arbitrary `.blend` file may not work without changes.
+```bash
+python -m pip install Pillow
+```
+6. fen dataset csv — a csv file containing the chessboard positions to render.
+
 
 ### 4.2 Preparing FEN positions
 
@@ -170,10 +207,6 @@ from_frame,to_frame,fen
 3,3,rnbqkbnr/pppppppp/8/8/4P3/5N2/PPPP1PPP/RNBQKB1R
 ```
 
-The generator uses the **piece-placement portion of FEN** (eight ranks separated by `/`). Uppercase letters are white pieces; lowercase letters are black pieces. `K/Q/R/B/N/P` denote king, queen, rook, bishop, knight, and pawn. Digits `1`–`8` represent consecutive empty squares. Every rank must add up to eight squares. The `from_frame` value determines the output name, e.g. `1` becomes `frame_000001.jpg`; keep `to_frame` equal to `from_frame` for compatibility with the training loader.
-
-The Blender script moves objects to the positions described by each FEN and can duplicate a piece object if the requested position has more pieces of that type than the original scene. It **does not certify chess legality**, so validate the CSV positions and inspect generated images before using them for training.
-
 ### 4.3 Configure local paths
 
 At the beginning of the Python driver script, edit these absolute paths to match your computer:
@@ -185,7 +218,7 @@ SCRIPT_FILE = r"C:\path\to\chess_position_api_v2.py"
 RESOLUTION = 2400
 ```
 
-Use **`blender.exe`**, not `blender-launcher.exe`. The provided driver uses absolute paths and calculates crop positions from `RESOLUTION`.
+Use `blender.exe`, not `blender-launcher.exe`. The provided driver uses absolute paths.
 
 ### 4.4 Run on Windows (PowerShell or terminal)
 
@@ -195,7 +228,7 @@ Navigate to the directory containing the driver script, then execute:
 python <dataset-generator-script>.py
 ```
 
-Replace `<dataset-generator-script>` with the **actual filename** of the script that contains `generate_dataset()`; it is not the Blender script `chess_position_api_v2.py`.
+Replace `<dataset-generator-script>` with the actual filename of the script that contains `generate_dataset()`; it is not the Blender script `chess_position_api_v2.py`.
 
 The program prompts:
 
@@ -242,30 +275,33 @@ Copy the completed `game<number>_per_frame` folder into `code/data/`. Keep the o
 
 ## 5. Training
 
-Run these commands from `code/` with the Conda environment activated. The training script requires `--mode` and supports three modes.
+Run these commands from `chessboard-project/` with the environment of your choice (conda or venv) activated. The training script requires `--mode` and supports three modes.
 
 ### 5.1 Zero-shot (synthetic images only)
 
 ```bash
 python train.py \
   --mode zero_shot \
-  --synthetic-games 2 4 8 9 21 23 42 \
-  --test-games 7 6 \
+  --synthetic-games 1 2 3 \
+  --test-games 5 6 \
   --epochs 10
 ```
+For synthetic games 1 2 3 and final validation (test) on 5 6 for 10 epoches
 
-### 5.2 Fine-tuning (real images from a checkpoint)
+### 5.2 Fine-tuning (real images + checkpoint)
 
 ```bash
 python train.py \
   --mode finetune \
   --checkpoint path/to/best_model.pth \
-  --real-games 5 \
-  --test-games 7 6 \
+  --real-games 4 \
+  --test-games 5 6 \
   --epochs 10
 ```
+For real game 4 and final validation (test) on 5 6 for 10 epoches
 
-By default, all model parameters are trainable. Optional alternatives are `--freeze-backbone` (train only the final classification layer) and `--partial-freeze` (freeze earlier ConvNeXt feature layers). These options are only supported in fine-tuning mode.
+By default, all model parameters are trainable . 
+Optional alternatives are `--freeze-backbone` (train only the final classification layer) and `--partial-freeze` (freeze earlier ConvNeXt feature layers). These options are only supported in fine-tuning mode.
 
 ### 5.3 Combined training (synthetic + real)
 
@@ -273,10 +309,12 @@ By default, all model parameters are trainable. Optional alternatives are `--fre
 python train.py \
   --mode combined \
   --synthetic-games 2 4 8 9 21 23 42 \
-  --real-games 5 \
-  --test-games 7 6 \
+  --real-games 4 \
+  --test-games 5 6 \
   --epochs 10
 ```
+
+For synthetic games 1 2 3, real game 4 and final validation (test) on 5 6 for 10 epoches
 
 The game IDs above are the current defaults in `config.py`. Adjust them to the game folders you actually downloaded; test games must not also be selected for training.
 
@@ -288,10 +326,10 @@ The game IDs above are the current defaults in `config.py`. Adjust them to the g
 | `--batch-size` | `2` | Boards per batch |
 | `--lr` | `0.0001` | Learning rate |
 | `--optimizer` | `adamw` | `adamw` or `sgd` |
-| `--val-fraction` | `0.20` | Requested internal validation fraction |
+| `--val-fraction` | `0.20` | Requested internal validation fraction (ther rest for training) |
 | `--seed` | `42` | Seed for reproducible splits |
-| `--num-workers` | `4` | Data-loading workers |
-| `--output-dir` | Automatic | Override experiment output directory |
+| `--num-workers` | `4` | Data loading workers |
+| `--output-dir` | In code | Override experiment output directory |
 | `--splits-file` | Not set | Restore a saved data split |
 | `--evaluate-ilp` | Off | Also compare ILP and Argmax after training |
 
@@ -299,15 +337,14 @@ The current training code uses **ordinary Cross Entropy Loss without class weigh
 
 ### 5.5 Training, validation, and test splits
 
-Training and internal validation are separated by **FEN piece-placement groups**: images with the same board position are kept together. The splitter tries several randomized group selections and prefers one close to the requested validation fraction for each required domain. Test games are selected separately from training games.
-
+Training and internal validation are separated by fens: images with the same board position are kept together. The splitter tries several randomized group selections and prefers one close to the requested validation fraction for each required domain. 
 To reuse a saved split, pass `--splits-file` and the same mode and game settings:
 
 ```bash
 python train.py \
   --mode combined \
-  --synthetic-games 2 4 8 9 21 23 42 \
-  --real-games 5 \
+  --synthetic-games 1 2 3 \
+  --real-games 4 \
   --test-games 7 6 \
   --splits-file path/to/splits.json \
   --epochs 10
@@ -319,27 +356,40 @@ Each run creates an experiment directory with files such as:
 
 ```text
 experiments/<experiment-name>/
+├── curves/
+│   ├── accuracy_curve.png
+│   ├── confusion_matrix.png
+│   └── loss_curve.png
 ├── models/
 │   ├── best_model.pth
 │   └── last_model.pth
-├── curves/
-│   ├── loss_curve.png
-│   ├── accuracy_curve.png
-│   └── confusion_matrix.png
-├── training_info/
-│   ├── train_settings.json
-│   ├── splits.json
-│   ├── history.json
-│   ├── final_metrics.json
-│   └── per_class_metrics.csv
-└── prediction_samples/
+├── prediction_samples/
+│   ├── prediction_00.png
+│   ├── ...
+│   ├── prediction_09.png
+│   ├── ilp_comparison_00.png(If ilp chosen)
+│   ├── ...
+│   └── ilp_comparison_04.png
+└── training_info/
+    ├── final_metrics.json
+    ├── history.json
+    ├── ilp_results.json (If ilp chosen)
+    ├── per_class_metrics.csv
+    ├── splits.json
+    └── train_settings.json
 ```
 
 `best_model.pth` contains the best validation epoch's weights; `last_model.pth` contains the final epoch's weights. The evaluation and visualization files record measured behavior on the selected data.
+ 
 
 ## 6. Prediction (ILP or Argmax)
 
-**Run from `code/`.** Because the prediction file lives in a `predict/` folder, use `python -m predict.predict` (no `.py` after the module name).
+Run from `chessboard-project/`. 
+Because the prediction file is in a `predict/` folder: 
+```bash
+python -m predict.predict
+```
+(no `.py` after the module name).
 
 ### 6.1 Select the checkpoint
 
@@ -348,7 +398,7 @@ The prediction function can use either the default path `MODEL_PATH` from `confi
 For example, set `MODEL_PATH` in `config.py` to a real file:
 
 ```python
-MODEL_PATH = "models/best_model.pth"
+MODEL_PATH = "path/to/best_model.pth"
 ```
 
 Or pass a different checkpoint when executing the command:
@@ -356,12 +406,12 @@ Or pass a different checkpoint when executing the command:
 ```bash
 --checkpoint path/to/best_model.pth
 ```
-
-The command-line checkpoint takes precedence. **For automatic course evaluation, `predict_board(image)` must work without a checkpoint argument, so the configured `MODEL_PATH` must point to a checkpoint that is available with the submission.**
+The command-line checkpoint takes precedence. 
+Per request an evaluation, `predict_board(image)` is available but the configured `MODEL_PATH`  must point to a model that is available.
 
 ### 6.2 Predict from an image
 
-By default, the script uses **ILP** decoding with the `promotion` constraint level:
+By default, the script uses ILP decoding:
 
 ```bash
 python -m predict.predict \
@@ -380,21 +430,6 @@ python -m predict.predict \
   --method argmax
 ```
 
-If the `--show-board` option is included in the current CLI implementation, add it to open the saved SVG with the local browser:
-
-```bash
-python -m predict.predict \
-  --image path/to/chessboard.jpg \
-  --checkpoint path/to/best_model.pth \
-  --method ilp \
-  --output predicted_board.svg \
-  --show-board
-```
-
-On a remote SSH/SLURM session, a browser might not open on the local machine. The SVG is still saved and can be opened through VS Code or copied to the local computer.
-
-The script prints the `(8, 8)` predicted tensor and **FEN piece placement**, and saves an SVG representation of the predicted board. Piece placement is only the first part of a full FEN; the model does **not** infer the active player, castling rights, or move counters.
-
 ### 6.3 Automatic evaluation API
 
 The course evaluation calls:
@@ -405,52 +440,34 @@ from predict.predict import predict_board
 prediction = predict_board(image)
 ```
 
-`image` must be an RGB NumPy array with shape `(H, W, 3)` and dtype `uint8`. The function returns a **CPU** `torch.Tensor` of shape `(8, 8)` and dtype `torch.int64` with class IDs `0`–`12`. The orientation follows the image (top-left to bottom-right). The default method is ILP, with an Argmax fallback if ILP solving fails.
-
 ## 7. ILP constraints and evaluation
 
-The ILP decoder maximizes the total log probability of the chosen square classes and adds the following constraint levels in order:
+The ILP decoder maximizes the total log probability of the chosen square classes and adds the following constraint:
 
-| Method | Added constraints |
-|---|---|
-| `assignment` | Exactly one class per square |
-| `kings` | Exactly one king of each color |
-| `material` | Up to eight pawns and 16 total pieces per color |
-| `adjacency` | Kings cannot be adjacent |
-| `promotion` | Extra non-pawn pieces require missing pawns |
-
-Each level includes the earlier levels. These rules improve structural consistency but do **not** guarantee that the board is a fully legal chess position.
+1. Exactly one class per square. 
+2. Exactly one king of each color.
+3. Up to eight pawns and 16 total pieces per color.
+4. Kings cannot be adjacent.
+5. Extra non-pawn pieces require missing pawns.
 
 To compare Argmax and ILP after a training run:
 
 ```bash
 python train.py \
   --mode combined \
-  --synthetic-games 2 4 8 9 21 23 42 \
-  --real-games 5 \
-  --test-games 7 6 \
+  --synthetic-games 1 2 3 \
+  --real-games 4 \
+  --test-games 5 6 \
   --evaluate-ilp
 ```
 
-The comparison is saved as `training_info/ilp_results.json` and can include visual comparisons in `prediction_samples/`. It records square accuracy, occupied-square accuracy, perfect-board accuracy, corrected errors, introduced errors, and solver failures.
+The comparison is saved as `training_info/ilp_results.json` and can include visual comparisons in `prediction_samples/`.
+It saves square accuracy, non-empty square accuracy, perfect-board accuracy, corrected errors, introduced errors and solver failures.
 
-The main evaluation also calculates **square accuracy**, **non-empty accuracy**, **perfect-board accuracy**, and **macro F1**, and saves a confusion matrix and per-class metrics. Overall square accuracy should be interpreted alongside non-empty accuracy because many squares are empty.
-
-## 8. Reproducing results
-
-1. Install the dependencies from `requirements.txt`.
-2. Download the data from the **[shared Google Drive folder](https://drive.google.com/drive/folders/1N6H6DVeqkYA5cxcQiJ63rsGe-8Z9u0Ka?hl=he)** and place the selected game folders under `code/data/`.
-3. Read the experiment's `training_info/train_settings.json` for its mode, hyperparameters, game IDs, optimizer, and seed.
-4. Reuse its `training_info/splits.json` using `--splits-file` when available.
-5. Run `train.py` with the corresponding settings and compare the generated metrics and plots.
-6. For inference, point `MODEL_PATH` or `--checkpoint` to the saved `best_model.pth`.
-
-Minor differences are possible across library versions and hardware. For a complete reproduction of the best reported result, record the **specific experiment folder, checkpoint, command, and measured metrics** when publishing the final submission.
+The main evaluation also calculates square accuracy, non-empty accuracy, perfect board accuracy, and macro F1  and saves a confusion matrix and per-class metrics. 
 
 ## 9. Limitations
 
-The best observed square accuracy was approximately **87% in combined training** (the best-case experimental result, not a guaranteed result for every image). This is not sufficient to reliably recognize every square of an entire board. Performance remains sensitive to the synthetic-to-real domain gap.
+The best observed square accuracy was approximately 87% in combined training (my best-case experimental result, not a guaranteed result for every image or experiment).
+The pipeline expects already aligned and cropped chessboards and does not perform automatic board detection or perspective correction. The blender generator provides aligned renders.
 
-The pipeline expects **already aligned, cropped chessboards** and does not perform automatic board localization or perspective correction. The Blender generator provides controlled aligned renders, but the generated images may differ from real photographs in materials, textures, lighting, shadows, and camera effects. ILP improves consistency only within its implemented constraints and is not a complete chess-legality checker.
-
-Potential future work includes more varied synthetic rendering and domain randomization, a multi-stage occupancy/color/piece classifier, additional carefully validated chess constraints, and automatic board detection and perspective correction.

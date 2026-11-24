@@ -96,7 +96,7 @@ def predict_board(image: np.ndarray, checkpoint=None, method="ilp"):
 
     if method == "ilp":
         try:
-            predictions = solve_board(logits,method="promotion")
+            predictions = solve_board(logits)
             predictions = torch.as_tensor(predictions,dtype=torch.int64)
 
         except RuntimeError as error:

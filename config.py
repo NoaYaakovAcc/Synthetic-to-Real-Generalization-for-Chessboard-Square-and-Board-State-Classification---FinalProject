@@ -21,7 +21,7 @@ SYNTHETIC_GAMES = [2, 4, 8, 9, 21, 23, 42]
 REAL_GAMES = [5]
 TEST_GAMES = [7 , 6]
 
-MODEL_PATH = "/home/noayaak/own_final_project/new_final_project/code/experiments/ablation/combined_s248_21_23_42_9_r5_adamw_7/models/best_model.pth"
+MODEL_PATH = "/home/noayaak/check _readme_good/chessboard-project/experiments/zero_shot_adamw_2_s124/models/best_model.pth"
 
 # ImageNet normalization
 IMAGENET_MEAN = [0.485, 0.456, 0.406]
