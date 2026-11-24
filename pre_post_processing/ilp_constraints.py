@@ -146,6 +146,7 @@ def solve_board(logits, time_limit=15):
         )
 
         problem += pawn_count + pulp.lpSum(extra_pieces) <= 8
+        
 
     solver = pulp.PULP_CBC_CMD(
         msg=False,

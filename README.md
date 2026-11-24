@@ -71,7 +71,7 @@ The project uses PyTorch, Torchvision, NumPy, Pandas, Pillow, OpenCV, Matplotlib
 ### 1.4 Verify the installation
 
 ```bash
-python -c "import torch, torchvision, cv2, chess, pulp; print('All imports OK'); print('CUDA available:', torch.cuda.is_available())"
+python -c "import torch, torchvision, cv2, chess, pulp; print('All imports are good'); print('cuda available:', torch.cuda.is_available())"
 ```
 
 ## 2. Repository structure
@@ -315,7 +315,7 @@ Optional alternatives are `--freeze-backbone` (train only the final classificati
 ```bash
 python train.py \
   --mode combined \
-  --synthetic-games 2 4 8 9 21 23 42 \
+  --synthetic-games 1 2 3 \
   --real-games 4 \
   --test-games 5 6 \
   --epochs 10

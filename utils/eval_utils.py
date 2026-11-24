@@ -489,7 +489,7 @@ def evaluate_ilp(model, test_loader, device, output_dir,
             argmax = logits.argmax(dim=-1)
             
             try:
-                ilp = torch.as_tensor(solve_board(logits, method="promotion"), dtype=torch.int64)
+                ilp = torch.as_tensor(solve_board(logits), dtype=torch.int64)
             except RuntimeError as error:
                 print("ILP failed for", image_path, ":", error)
                 solver_failures += 1

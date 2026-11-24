@@ -11,7 +11,7 @@
     9
   ],
   "real_games": [
-    5
+    
   ],
   "test_games": [
     6,
@@ -19,18 +19,15 @@
   ],
   "val_fraction": 0.2,
   "checkpoint": null,
-  "splits_file": "experiments/ablation/convextiny_aug_unweighted_s248-21-23-42_9_adamW_5/training_info/splits.json",
-  "output_dir": "experiments/ablation/convextiny_aug_weighted_s248-21-23-42_9_adamW_5_reproduce",
+  "splits_file": null,
+  "output_dir": "experiments/ablation/zero_shot_convnext+diverse+augment+weightedce",
   "epochs": 7,
   "lr": 0.0001,
   "batch_size": 2,
   "num_workers": 4,
   "seed": 42,
-  "freeze_backbone": false,
-  "partial_freeze": false,
   "optimizer": "adamw",
   "evaluate_ilp": true,
-  "freeze_mode": "none",
   "weight_decay": 0.0001,
   "piece_loss_weight": 1.25,
   "empty_loss_weight": 0.75,

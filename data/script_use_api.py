@@ -1,3 +1,19 @@
+"""
+This file generates synthetic chessboard images using blender.
+
+The image generation process is:
+1. Asks the user to select a folder containing a csv file with fen positions.
+2. Creates an output folder for the generated images.
+3. Lets the user choose one of three camera views: overhead, east, west.
+4. Reads each fen position from the csv file.
+5. Runs blender to arrange the chess pieces and render the selected camera view.
+6. Crops the rendered image to the chessboard area.
+7. Saves the cropped image as a jpg using its frame number.
+8. Removes temporary blender images after successful processing.
+
+Images that already exist are skipped to avoid generating them again.
+
+"""
 import subprocess
 import os
 import csv
@@ -5,18 +21,16 @@ import glob
 import time
 from PIL import Image
 
-# --- Configuration ---
-# CRITICAL: Use 'blender.exe', NOT 'blender-launcher.exe'.
-# CRITICAL: Change for your own directory for those files, for some reason relative directory don't work
+
 BLENDER_EXE = r"C:\Program Files\Blender Foundation\Blender 5.0\blender.exe"
 BLEND_FILE = r"C:\Users\Owner\Documents\own_final_project\chessboard_generation\chess-set.blend"
 SCRIPT_FILE =  r"C:\Users\Owner\Documents\own_final_project\chessboard_generation\chess_position_api_v2.py"
-RESOLUTION = 2400  # Resolution defined here to use in crop calculations
+RESOLUTION = 2400 
 
 
 def generate_dataset():
  
-    input_dir_raw = input("Enter the directory path containing the CSV file: ").strip().strip('"')
+    input_dir_raw = input("Enter the directory path containing the csv file: ").strip().strip('"')
     input_dir = os.path.abspath(input_dir_raw)
 
     csv_files = glob.glob(os.path.join(input_dir, "*.csv"))
@@ -25,24 +39,21 @@ def generate_dataset():
         return
 
     csv_path = csv_files[0]
-    print(f"Found CSV: {csv_path}")
+    print(f"Found csv: {csv_path}")
 
     output_dir = os.path.join(input_dir, "generated_images")
     os.makedirs(output_dir, exist_ok=True)
-    print(f"Output Directory: {output_dir}")
+    print(f"Output directory: {output_dir}")
 
-    print("\nThe Blender script generates 3 views. Which one do you want to keep?")
-    print("1. overhead (Keeps '1_overhead.png') - Cropped Center")
-    print("2. east     (Keeps '2_east.png')     - Cropped Right Side")
-    print("3. west     (Keeps '3_west.png')     - Cropped Left Side")
+    print("\nThe blender script generates 3 views. Which one do you want to keep?")
+    print("1. for overhead - Cropped Center")
+    print("2. for east - Cropped Right Side")
+    print("3. for west - Cropped Left Side")
 
     view_map = {
         "1": ("1_overhead.png", "overhead"),
-        "overhead": ("1_overhead.png", "overhead"),
         "2": ("2_east.png", "east"),
-        "east": ("2_east.png", "east"),
         "3": ("3_west.png", "west"),
-        "west": ("3_west.png", "west")
     }
 
     choice = input("Enter choice: ").strip().lower()
@@ -61,7 +72,7 @@ def generate_dataset():
                 frame_id = int(row['from_frame'])
                 fen = row['fen']
             except KeyError:
-                print("Error: CSV must have 'from_frame' and 'fen' columns.")
+                print("Error: csv must have 'from_frame' and 'fen' columns.")
                 return
 
             final_filename = f"frame_{frame_id:06d}.jpg"
@@ -100,7 +111,7 @@ def generate_dataset():
                     print(e.stderr[-3000:])
                     continue
             
-            # check that Blender generated the image
+            # checks that blender generated the image
             source_path = os.path.join(output_dir, target_source_file)
 
             print("Expected path:", repr(source_path))
@@ -113,7 +124,7 @@ def generate_dataset():
                 print("Blender STDERR:", result.stderr[-3000:])
                 continue
 
-            # crop and save image
+            # crops and save image
             try:
                 with Image.open(source_path) as img:
                     width, height = img.size
@@ -143,7 +154,7 @@ def generate_dataset():
 
                 print(f"Saved successfully: {final_path}")
 
-                # Cleanup temporary Blender renders
+                # cleanup temporary Blender renders
                 for fname in generated_files:
                     temp_path = os.path.join(output_dir, fname)
                     if os.path.isfile(temp_path):

@@ -11,7 +11,7 @@
     9
   ],
   "real_games": [
-    5
+    
   ],
   "test_games": [
     6,
@@ -20,22 +20,15 @@
   "val_fraction": 0.2,
   "checkpoint": null,
   "splits_file": null,
-  "output_dir": "experiments/ablation/resnet18_no_aug_unweighted_s248-21-23-42_9",
+  "output_dir": "experiments/ablation/zero_shot_resnet18+diverse_data",
   "epochs": 20,
   "lr": 0.0001,
   "batch_size": 2,
   "num_workers": 4,
   "seed": 42,
-  "freeze_backbone": false,
-  "partial_freeze": false,
   "optimizer": "sgd",
-  "evaluate_ilp": true,
-  "freeze_mode": "none",
   "weight_decay": 0.0001,
-  "piece_loss_weight": 1.25,
-  "empty_loss_weight": 0.75,
-  "loss_function": "CrossEntropyLoss ",
+  "loss_function": "CrossEntropyLoss",
   "backbone": "resnet18",
-  "augmentation": "synthetic_train_only: ColorJitter(p=0.8), GaussianBlur(p=0.2)",
   "split_attempts": 1200
 }
