@@ -244,7 +244,7 @@ The script uses the first `csv` file found in the selected directory. Make sure 
 Next, choose the camera view for generating the images:
 
 | Choice | View | 
-|---|---|---|
+|---|---|
 | `1`  | Overhead | 
 | `2`  | East | 
 | `3`  | West | 
