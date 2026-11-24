@@ -47,7 +47,6 @@ Windows:
 Linux / WSL:
 
 ```bash
-python3.10 -m venv .venv
 source .venv/bin/activate
 ```
 
@@ -56,7 +55,7 @@ I personally prefer conda
 
 ### 1.3 Install dependencies
 
-If you chose venv please start with"
+If you chose venv please start with:
 
 ```bash
 python -m pip install --upgrade pip
@@ -67,7 +66,7 @@ Then for both choices:
 python -m pip install -r requirements.txt
 ```
 
-The project uses PyTorch, Torchvision, NumPy, Pandas, Pillow, OpenCV, Matplotlib, `python-chess`, and PuLP. The ILP component uses the **CBC** solver through PuLP; make sure CBC is available in the installed environment. For GPU execution, install a PyTorch build compatible with the system's CUDA driver.
+The project uses PyTorch, Torchvision, NumPy, Pandas, Pillow, OpenCV, Matplotlib, `python-chess`, and PuLP. The ILP component uses the **CBC** solver through PuLP; make sure CBC is available in the installed environment. For GPU execution, install a PyTorch build compatible with the system's cuda driver.
 
 ### 1.4 Verify the installation
 
@@ -103,7 +102,7 @@ chessboard-project/
 ```
 
 - `config.py`: Default paths, hyperparameters and class-label mappings.
-- `data.py` and `utils/data_utils.py`: Scan labeled images, parse fen labels, build loaders, and manage data splits.
+- `data.py` and `utils/data_utils.py`: Scan labeled images, parse fen labels, build loaders and manage data splits.
 - `model/model.py`: Convnext-tiny classifier applied to 64 square crops.
 - `pre_post_processing/preprocessing.py`: rgb resizing, normalization and synthetic training augmentation.
 - `pre_post_processing/ilp_constraints.py`: ILP decoding with constraints.
@@ -151,15 +150,15 @@ from_frame,to_frame,fen
 2,2,rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR
 ```
 
-For the current loader, **`from_frame` and `to_frame` must match**. 
+For the current loader, `from_frame` and `to_frame` must match 
 Image names must contain `frame` followed by the frame number, such as `frame_000616.jpg`. Images are matched to their labels by this number. For example `frame_000616.jpg` is mached with 616,616 fen.
 
 
-Image paths containing `generated` are treated as **synthetic**, while paths containing `tagged` are treated as **real**.
+Image paths containing `generated` are treated as synthetic, while paths containing `tagged` are treated as real.
 
 ### 3.3 Input format and classes
 
-The input must show a cropped and aligned chessboard. Preprocessing converts it to RGB and resizes it.
+The input must show a cropped and aligned chessboard. Preprocessing converts it to rgb and resizes it.
 
 The 13 output labels are:
 
@@ -173,27 +172,27 @@ The 13 output labels are:
 | 5 | White king | 11 | Black king |
 | 12 | Empty | | |
 
-Predictions follow the **image's row order**: the first output element represents the top-left square of the supplied image.
+Predictions follow the image's row order: the first output element represents the top-left square of the supplied image.
 
 ## 4. Generating new synthetic images with blender 
 
 The project includes a separate blender based pipeline for generating synthetic chessboard images from fen positions.
-The generator was developed and tested on Windows using Blender 5.0.
+The generator was tested on Windows using Blender 5.0.
 
 ### 4.1 Files and installation
 
 Prepare the following:
 
-1. Blender 5.0 — installed on the machine used for rendering.
-2. chess-set.blend — the prepared blender scene containing the chessboard and chess pieces.
-3. chess_position_api_v2.py — the blender script responsible for positioning pieces according to fen notation and rendering the board.
-4. Dataset generation — the Python script containing generate_dataset(), which manages the rendering process and saves the generated images.
-5. Python and Pillow — required for the dataset generation. Install Pillow using:
+1. Blender 5.0 — Installed on the machine used for rendering.
+2. chess-set.blend — The prepared blender scene containing the chessboard and chess pieces.
+3. chess_position_api_v2.py — The blender script responsible for positioning pieces according to fen notation and rendering the board.
+4. Dataset generation — The Python script containing generate_dataset(), which manages the rendering process and saves the generated images.
+5. Python and Pillow — Required for the dataset generation. Install Pillow using:
 
 ```bash
 python -m pip install Pillow
 ```
-6. fen dataset csv — a csv file containing the chessboard positions to render.
+6. fen dataset csv — A csv file containing the chessboard positions to render.
 
 
 ### 4.2 Preparing FEN positions
@@ -209,7 +208,7 @@ from_frame,to_frame,fen
 
 ### 4.3 Configure local paths
 
-At the beginning of the Python driver script, edit these absolute paths to match your computer:
+At the beginning of the Python script, edit these absolute paths to match your computer:
 
 ```python
 BLENDER_EXE = r"C:\Program Files\Blender Foundation\Blender 5.0\blender.exe"
@@ -218,64 +217,72 @@ SCRIPT_FILE = r"C:\path\to\chess_position_api_v2.py"
 RESOLUTION = 2400
 ```
 
-Use `blender.exe`, not `blender-launcher.exe`. The provided driver uses absolute paths.
+Use `blender.exe`, not `blender-launcher.exe`. The provided script uses absolute paths.
 
-### 4.4 Run on Windows (PowerShell or terminal)
+### 4.4 Run on windows 
 
 Navigate to the directory containing the driver script, then execute:
 
 ```powershell
-python <dataset-generator-script>.py
+python script_use_api.py
 ```
-
-Replace `<dataset-generator-script>` with the actual filename of the script that contains `generate_dataset()`; it is not the Blender script `chess_position_api_v2.py`.
 
 The program prompts:
 
 ```text
-Enter the directory path containing the CSV file:
+Enter the directory path containing the csv file (better to have in the same folder):
 ```
 
 Enter the folder containing the prepared `.csv`, for example:
 
 ```text
-C:\Users\Owner\Documents\chess_data\game42_per_frame
+C:\Users\Owner\Documents\chess_data
 ```
 
-The driver selects the **first `.csv` file** it finds in the directory. Keep only the intended CSV there to avoid using the wrong labels.
+The script uses the first `csv` file found in the selected directory. Make sure it is the correct csv file.
 
-It then asks which rendered view to retain:
+Next, choose the camera view for generating the images:
 
-| Choice | View | Output crop |
+| Choice | View | 
 |---|---|---|
-| `1` or `overhead` | Overhead | Center of the render |
-| `2` or `east` | East | Right-side crop |
-| `3` or `west` | West | Left-side crop |
+| `1`  | Overhead | 
+| `2`  | East | 
+| `3`  | West | 
 
-The default for an unrecognized entry is `overhead`. The current driver passes `--view white` and the selected `--view_angle` to Blender. **Only the selected view is rendered in each Blender invocation** with the supplied script; the driver then crops it and saves a JPEG image. The generated view naming and crop coordinates are specific to the provided scene and script.
-
-For each row, the driver launches Blender in background mode, applies the FEN, renders, crops the output, and writes:
+The default view is Overhead.
+For each fen position in the csv, the script runs blender, generates the selected view, crops the image, and saves it as a `jpeg` in the `generated_images`/ folder.
 
 ```text
-game42_per_frame/
-├── game42.csv
 └── generated_images/
     ├── frame_000001.jpg
     ├── frame_000002.jpg
     └── ...
 ```
 
-Existing output JPEGs are skipped. After successful cropping, temporary Blender PNG renders are deleted. Check the terminal output for rendering errors; failed frames may need to be rerun.
+Existing images are skipped, and temporary blender renders are removed after successful processing.
 
 ### 4.5 Use the generated images for training
 
-Copy the completed `game<number>_per_frame` folder into `code/data/`. Keep the original CSV next to `generated_images/` so the loader can associate each image with its FEN. Select its game number through `--synthetic-games` during training.
+Create a folder named `game<number>_per_frame` inside code/data/, replacing `<number>` with the game number.
 
-**Note:** The local rendering workflow and SLURM training workflow are separate. You can download/upload generated images between the local computer, Google Drive, and the training environment; do not assume that Blender's OptiX setup will work on the SLURM nodes.
+Inside this folder, place the `generated_images/`, directory containing the generated images, and a CSV file named `game<number>.csv` containing the corresponding fen positions in the required format (from_frame,to_frame,fen).
+
+The expected structure is:
+
+code/data/
+└── game42_per_frame/
+    ├── game42.csv
+    └── generated_images/
+        ├── frame_000001.jpg
+        ├── frame_000002.jpg
+        └── ...
+
+To include the generated images in training, specify the corresponding game number using the --synthetic-games argument.
 
 ## 5. Training
 
 Run these commands from `chessboard-project/` with the environment of your choice (conda or venv) activated. The training script requires `--mode` and supports three modes.
+
 
 ### 5.1 Zero-shot (synthetic images only)
 
