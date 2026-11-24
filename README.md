@@ -118,7 +118,7 @@ chessboard-project/
 
 **[Open the shared dataset folder on Google Drive](https://drive.google.com/drive/folders/1N6H6DVeqkYA5cxcQiJ63rsGe-8Z9u0Ka?hl=he)**
 
-Download the required game folders and place them inside `code/data/`. Access to the folder may depend on its sharing permissions.
+Download the required game folders and place them inside `data/`. Access to the folder may depend on its sharing permissions.
 
 ### 3.2 Expected game-folder format
 
