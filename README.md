@@ -126,16 +126,16 @@ The code expects game folders named `game<number>_per_frame`, for example:
 
 ```text
 data/
-├── game5_per_frame/
-│   ├── game5.csv
+├── game1_per_frame/
+│   ├── game1.csv
 │   └── tagged_images/
 │       └── frame_000001.jpg
-├── game7_per_frame/
-│   ├── game7.csv
+├── game2_per_frame/
+│   ├── game2.csv
 │   └── tagged_images/
 │       └── ...
-└── game42_per_frame/
-    ├── game42.csv
+└── game3_per_frame/
+    ├── game3.csv
     ├── generated_images/
     │   └── frame_000616.jpg
     └── tagged_images/
@@ -250,7 +250,7 @@ Next, choose the camera view for generating the images:
 | `3`  | West | 
 
 The default view is Overhead.
-For each fen position in the csv, the script runs blender, generates the selected view, crops the image, and saves it as a `jpeg` in the `generated_images`/ folder.
+For each fen position in the csv, the script runs blender, generates the selected view, crops the image and saves it as a `jpg` in the `generated_images`/ folder.
 
 ```text
 └── generated_images/
@@ -263,19 +263,21 @@ Existing images are skipped, and temporary blender renders are removed after suc
 
 ### 4.5 Use the generated images for training
 
-Create a folder named `game<number>_per_frame` inside code/data/, replacing `<number>` with the game number.
+Create a folder named `game<number>_per_frame` inside `data/`, replacing `<number>` with the game number.
 
 Inside this folder, place the `generated_images/`, directory containing the generated images, and a CSV file named `game<number>.csv` containing the corresponding fen positions in the required format (from_frame,to_frame,fen).
 
 The expected structure is:
 
-code/data/
-└── game42_per_frame/
-    ├── game42.csv
+```text
+data/
+└── game1_per_frame/
+    ├── game1.csv
     └── generated_images/
         ├── frame_000001.jpg
         ├── frame_000002.jpg
         └── ...
+```
 
 To include the generated images in training, specify the corresponding game number using the --synthetic-games argument.
 
@@ -308,7 +310,7 @@ python train.py \
 For real game 4 and final validation (test) on 5 6 for 10 epoches
 
 By default, all model parameters are trainable . 
-Optional alternatives are `--freeze-backbone` (train only the final classification layer) and `--partial-freeze` (freeze earlier ConvNeXt feature layers). These options are only supported in fine-tuning mode.
+Optional alternatives are `--freeze-backbone` (train only the final classification layer) and `--partial-freeze` (freeze earlier convnext feature layers). These options are only supported in fine-tuning mode.
 
 ### 5.3 Combined training (synthetic + real)
 
@@ -340,7 +342,6 @@ The game IDs above are the current defaults in `config.py`. Adjust them to the g
 | `--splits-file` | Not set | Restore a saved data split |
 | `--evaluate-ilp` | Off | Also compare ILP and Argmax after training |
 
-The current training code uses **ordinary Cross Entropy Loss without class weights**. AdamW is the default optimizer; `WEIGHT_DECAY` is configured in `config.py`. The selected checkpoint maximizes **validation non-empty accuracy**, breaking ties using validation loss.
 
 ### 5.5 Training, validation, and test splits
 
@@ -352,7 +353,7 @@ python train.py \
   --mode combined \
   --synthetic-games 1 2 3 \
   --real-games 4 \
-  --test-games 7 6 \
+  --test-games 5 6 \
   --splits-file path/to/splits.json \
   --epochs 10
 ```
